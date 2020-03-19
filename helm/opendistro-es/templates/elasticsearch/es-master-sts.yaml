@@ -155,70 +155,54 @@ spec:
           name: config
           subPath: logging.yml
         {{- if .Values.elasticsearch.ssl.transport.existingCertSecret }}
-        - mountPath: {{ .Values.elasticsearch.configDirectory }}/elk-transport-crt.pem
+        - mountPath: {{ .Values.elasticsearch.configDirectory }}/transport
           name: transport-certs
-          subPath: elk-transport-crt.pem
-        - mountPath: {{ .Values.elasticsearch.configDirectory }}/elk-transport-key.pem
-          name: transport-certs
-          subPath: elk-transport-key.pem
-        - mountPath: {{ .Values.elasticsearch.configDirectory }}/elk-transport-root-ca.pem
-          name: transport-certs
-          subPath: elk-transport-root-ca.pem
         {{- end }}
         {{- if and .Values.elasticsearch.ssl.rest.enabled .Values.elasticsearch.ssl.rest.existingCertSecret }}
-        - mountPath: {{ .Values.elasticsearch.configDirectory }}/elk-rest-crt.pem
+        - mountPath: {{ .Values.elasticsearch.configDirectory }}/rest
           name: rest-certs
-          subPath: elk-rest-crt.pem
-        - mountPath: {{ .Values.elasticsearch.configDirectory }}/elk-rest-key.pem
-          name: rest-certs
-          subPath: elk-rest-key.pem
-        - mountPath: {{ .Values.elasticsearch.configDirectory }}/elk-rest-root-ca.pem
-          name: rest-certs
-          subPath: elk-rest-root-ca.pem
         {{- end }}
         {{- if and .Values.elasticsearch.ssl.admin.enabled .Values.elasticsearch.ssl.admin.existingCertSecret }}
-        - mountPath: {{ .Values.elasticsearch.configDirectory }}/admin-crt.pem
+        - mountPath: {{ .Values.elasticsearch.configDirectory }}/admin
           name: admin-certs
-          subPath: admin-crt.pem
-        - mountPath: {{ .Values.elasticsearch.configDirectory }}/admin-key.pem
-          name: admin-certs
-          subPath: admin-key.pem
-        - mountPath: {{ .Values.elasticsearch.configDirectory }}/admin-root-ca.pem
-          name: admin-certs
-          subPath: admin-root-ca.pem
         {{- end }}
         {{- if .Values.elasticsearch.securityConfig.enabled }}
-        {{- if .Values.elasticsearch.securityConfig.actionGroupsSecret }}
+        {{-   if .Values.elasticsearch.securityConfig.all }}
+        - mountPath: {{ .Values.elasticsearch.securityConfig.path }}
+          name: securityconfig
+        {{-   else }}
+        {{-     if .Values.elasticsearch.securityConfig.action_groups }}
         - mountPath: {{ .Values.elasticsearch.securityConfig.path }}/action_groups.yml
-          name: action-groups
+          name: securityconfig
           subPath: action_groups.yml
-        {{- end }}
-        {{- if .Values.elasticsearch.securityConfig.configSecret }}
+        {{-     end }}
+        {{-     if .Values.elasticsearch.securityConfig.config }}
         - mountPath: {{ .Values.elasticsearch.securityConfig.path }}/config.yml
-          name: security-config
+          name: securityconfig
           subPath: config.yml
-        {{- end }}
-        {{- if .Values.elasticsearch.securityConfig.internalUsersSecret }}
+        {{-     end }}
+        {{-     if .Values.elasticsearch.securityConfig.internal_users }}
         - mountPath: {{ .Values.elasticsearch.securityConfig.path }}/internal_users.yml
-          name: internal-users-config
+          name: securityconfig
           subPath: internal_users.yml
-        {{- end }}
-        {{- if .Values.elasticsearch.securityConfig.rolesSecret }}
+        {{-     end }}
+        {{-     if .Values.elasticsearch.securityConfig.roles }}
         - mountPath: {{ .Values.elasticsearch.securityConfig.path }}/roles.yml
-          name: roles
+          name: securityconfig
           subPath: roles.yml
-        {{- end }}
-        {{- if .Values.elasticsearch.securityConfig.rolesMappingSecret }}
+        {{-     end }}
+        {{-     if .Values.elasticsearch.securityConfig.roles_mapping }}
         - mountPath: {{ .Values.elasticsearch.securityConfig.path }}/roles_mapping.yml
-          name: role-mapping
+          name: securityconfig
           subPath: roles_mapping.yml
-        {{- end }}
-        {{- if .Values.elasticsearch.securityConfig.tenantsSecret }}
+        {{-     end }}
+        {{-     if .Values.elasticsearch.securityConfig.tenants }}
         - mountPath: {{ .Values.elasticsearch.securityConfig.path }}/tenants.yml
-          name: tenants
+          name: securityconfig
           subPath: tenants.yml
+        {{-     end }}
+        {{-   end }}
         {{- end }}
-      {{- end }}
       volumes:
       - name: config
         secret:
@@ -238,35 +222,10 @@ spec:
         secret:
           secretName: {{ .Values.elasticsearch.ssl.admin.existingCertSecret }}
       {{- end }}
-      {{- if .Values.elasticsearch.securityConfig.actionGroupsSecret }}
-      - name: action-groups
+      {{- if .Values.elasticsearch.securityConfig.existingConfigSecret }}
+      - name: securityconfig
         secret:
-          secretName: {{ .Values.elasticsearch.securityConfig.actionGroupsSecret }}
-      {{- end }}
-      {{- if .Values.elasticsearch.securityConfig.configSecret }}
-      - name: security-config
-        secret:
-          secretName: {{ .Values.elasticsearch.securityConfig.configSecret }}
-      {{- end }}
-      {{- if .Values.elasticsearch.securityConfig.internalUsersSecret }}
-      - name: internal-users-config
-        secret:
-          secretName: {{ .Values.elasticsearch.securityConfig.internalUsersSecret }}
-      {{- end }}
-      {{- if .Values.elasticsearch.securityConfig.rolesSecret }}
-      - name: roles
-        secret:
-          secretName: {{ .Values.elasticsearch.securityConfig.rolesSecret }}
-      {{- end }}
-      {{- if .Values.elasticsearch.securityConfig.rolesMappingSecret }}
-      - name: role-mapping
-        secret:
-          secretName: {{ .Values.elasticsearch.securityConfig.rolesMappingSecret }}
-      {{- end -}}
-      {{- if .Values.elasticsearch.securityConfig.tenantsSecret }}
-      - name: tenants
-        secret:
-          secretName: {{ .Values.elasticsearch.securityConfig.tenantsSecret }}
+          secretName: {{ .Values.elasticsearch.securityConfig.existingConfigSecret }}
       {{- end }}
       {{- if not .Values.elasticsearch.master.persistence.enabled }}
       - name: "data"
