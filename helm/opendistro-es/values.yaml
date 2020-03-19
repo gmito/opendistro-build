@@ -127,13 +127,17 @@ elasticsearch:
   discoveryOverride: ""
   securityConfig:
     enabled: true
+    existingConfigSecret: opendistro-securityconfig
     path: "/usr/share/elasticsearch/plugins/opendistro_security/securityconfig"
-    actionGroupsSecret:
-    configSecret:
-    internalUsersSecret:
-    rolesSecret:
-    rolesMappingSecret:
-    tenantsSecret:
+    ## mount the whole secret in .path
+    all: true
+    ## or mount the keys (subPaths) individually
+    action_groups: false
+    config: false
+    internal_users: false
+    roles: false
+    roles_mapping: false
+    tenants: false
 
   extraEnvs: []
 
